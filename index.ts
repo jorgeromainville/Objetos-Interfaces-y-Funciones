@@ -192,21 +192,13 @@ else if (opcion == "6") {
   }
 }
 
+// lo hice mas bonito pero ya no me dio tiempo para el extra :c
 // ==========================================
-// entregable Jueves y viernes
+// entregable Jueves y viernes va arriba
 // ==========================================
 
 // nuevas funciones estan arriba por que aca abajo tiraba error 
 //tambien diculpe por lo del menu de comida ese dia fue mas ocupado que un dia de clase entonces estaba mas perdido
 
-/// va arriba
-
-
-
 // 🚫 No eliminar las líneas de abajo ⬇️
 rl.close();
-
-
-
-
-
