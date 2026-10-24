@@ -5,16 +5,16 @@ const rl = readline.createInterface({ input, output });
 // 🚫 No eliminar las líneas de arriba ⬆️
 
 // ✍️ Escribe tu código aquí 👇
+
 let nombreSistema: string = "planeador";
 let version: number = 2.5;
 let nombreUsuario: string = "Roman";
 
-console.log(
-  "nombre del sistema: " + nombreSistema +
-  " version " + version + 
-  ", bienvenido! " + nombreUsuario
-);
-
+console.log("================================");
+console.log("== MI 1er SISTEMA: " + nombreSistema + "  ==");
+console.log("== version: " + version + "               ==");
+console.log("== BIENVENIDO!: " + nombreUsuario + "         ==");
+console.log("================================");
 
 // ==========================================
 // GESTOR DE TAREAS (Entregable Miércoles)
@@ -31,12 +31,33 @@ interface Task {
 let tareas: Task[] = [];
 let contadorId: number = 1;
 
+const saveToDB = (tarea:string) => {
+  return new Promise<void>((resolve) => {
+    setTimeout(() => {
+        resolve();
+    }, 2000);
+  });
+}
+
 // Agregar tarea
-const addTask = (title: string): void => {
+const addTask = async (title: string) => {
   let nuevaTarea: Task = { id: contadorId, title: title, completed: false };
-  tareas.push(nuevaTarea);
-  contadorId++;
-  console.log("Tarea agregada: " + title);
+  try {
+    if (title == "") {
+      throw new Error(
+        console.log("================================"),
+        console.log("No se puede agregar sin titulo"),
+        console.log("================================")
+      );
+    }
+    console.log("guardando "+ title + " en la Base de Datos...");
+    await saveToDB(title);
+    tareas.push(nuevaTarea);
+    contadorId++;
+
+  }catch (error) {
+    console.log(error + " intente de nuevo");
+  }
 };
 
 // Listar tareas (Desestructuración + .map + .forEach) que dificil esto la verdad sin IA no pudiera haber entendido
@@ -44,16 +65,18 @@ const listTasks = (): void => {
   if (tareas.length === 0) {
     console.log("No hay tareas registradas.");
   } else {
-    console.log("Tus tareas:");
+    console.log("====-------Tus tareas-------====");
     const tareasFormateadas = tareas.map((task) => {
       const { id, title, completed } = task; 
-      const estado = completed ? "completed" : "pending";
+      const estado = completed ? "---completada---" : "---pendiente---";
       return `[${id}] ${title} - ${estado}`;
     });
 
     tareasFormateadas.forEach((mensaje) => {
       console.log(mensaje);
     });
+
+    console.log("================================")
   }
 };
 
@@ -62,10 +85,14 @@ const removeTask = (): void => {
   if (tareas.length > 0) {
     let tareaEliminada = tareas.pop();
     if (tareaEliminada) {
-      console.log("Tarea eliminada: " + tareaEliminada.title);
+    console.log("===============================")
+      console.log("====----Tarea eliminada:----==> " + tareaEliminada.title);
+      console.log("===============================")
     }
   } else {
-    console.log("No hay tareas para eliminar.");
+    console.log("===============================")
+    console.log("=-No hay tareas para eliminar-= ");
+    console.log("===============================")
   }
 };
 
@@ -74,9 +101,11 @@ const markCompleted = (id: number) => {
   let localizador = tareas.find(task => task.id == id);
   if (localizador) {
     localizador.completed = true;
-    console.log("Tarea completada: " + localizador.title);
+    console.log("===============================")
+    console.log("====----Tarea completada----==> " + localizador.title);
+    console.log("===============================")
   }else {
-    console.log("No se encontro la tarea")
+    console.log("=== No se encontro la tarea ===")
   }
 }
 
@@ -90,27 +119,27 @@ const filterCompleted = () => {
   return completedTasks;
 };
 
-
 // MENÚ INTERACTIVO
 let opcion: string = "";
 
 while (opcion != "7") {
   console.log(""); 
-  console.log("--- MENÚ GESTOR DE TAREAS ---");
-  console.log("1. Agregar tarea");
-  console.log("2. Eliminar última tarea");
-  console.log("3. Listar tareas");
-  console.log("4. Completar tarea");
-  console.log("5. Tareas pendientes");
-  console.log("6. Tareas completadas");
-  console.log("7. Salir");
+  console.log("==--- MENÚ GESTOR DE TAREAS --==");
+  console.log("==--- seleccione una opcion --==");
+  console.log("== 1. Agregar tarea           ==");
+  console.log("== 2. Eliminar última tarea   ==");
+  console.log("== 3. Listar tareas           ==");
+  console.log("== 4. Completar tarea         ==");
+  console.log("== 5. Tareas pendientes       ==");
+  console.log("== 6. Tareas completadas      ==");
+  console.log("== 7. Salir                   ==");
 
-  opcion = await rl.question("Elige una opción: ");
+  opcion = await rl.question(" ----->Elige una opción:-----> ");
 
   // Opción 1: Pedimos el título y llamamos a addTask
   if (opcion == "1") {
     let titulo = await rl.question("Ingresa el título de la tarea: ");
-    addTask(titulo);
+    await addTask(titulo);
   }
   // Opción 2: Solo llamamos a removeTask
   else if (opcion == "2") {
@@ -132,7 +161,9 @@ else if (opcion == "5") {
     console.log("No hay tareas pendientes.");
   } else {
     pendientes.forEach(({ id, title }) => {
-      console.log(`[${id}] ${title} - pending`);
+      console.log("==============================="); 
+      console.log(`[${id}] ${title} - ---pendientes`);
+      console.log("==============================="); 
     });
   }
 }
@@ -143,34 +174,31 @@ else if (opcion == "6") {
     console.log("No hay tareas completadas.");
   } else {
     completadas.forEach(({ id, title }) => {
-      console.log(`[${id}] ${title} - completed`);
+      console.log("==============================="); 
+      console.log(`[${id}] ${title} - ---completadas`);
+      console.log("==============================="); 
     });
   }
 }
 
   // Opción 7: Salir
   else if (opcion == "7") {
-    console.log("¡Hasta luego!");
+    console.log("  _∧,,,∧");
+    console.log("(  ̳• · • ̳)");
+    console.log("/    づ♡  ¡Hasta luego!");
   }
   else {
     console.log("Opción no válida. Intenta de nuevo.");
   }
 }
+
+// lo hice mas bonito pero ya no me dio tiempo para el extra :c
 // ==========================================
-// entregable Jueves
+// entregable Jueves y viernes va arriba
 // ==========================================
 
 // nuevas funciones estan arriba por que aca abajo tiraba error 
 //tambien diculpe por lo del menu de comida ese dia fue mas ocupado que un dia de clase entonces estaba mas perdido
 
-}
-
-
-
 // 🚫 No eliminar las líneas de abajo ⬇️
 rl.close();
-
-
-
-
-
