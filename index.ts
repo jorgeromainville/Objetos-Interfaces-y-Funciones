@@ -5,61 +5,208 @@ const rl = readline.createInterface({ input, output });
 // 🚫 No eliminar las líneas de arriba ⬆️
 
 // ✍️ Escribe tu código aquí 👇
-let systemName: string = "planeador"
-let version: number = 2.5
-let userName:string = "Roman"
 
-console.log(
-    "nombre del sistema: " + systemName +
-    " version " + version + 
-    ", bienvenido! " + userName
-);
-//menu interactivo  Implementa un menú interactivo usando rl.question() para leer la entrada del usuario. El menú debe estar envuelto en un ciclo while o do while que lo mantenga visible y activo, mostrando las opciones disponibles en cada iteración. El ciclo solo termina cuando el usuario elige la opción de salir. ar última tarea: elimina el último elemento del arreglo con .pop() e imprime el título eliminado
-//Listar tareas: usa un ciclo for para recorrer el arreglo e imprimir cada título con su número de posición
-//Salir: termina el ciclo
+let nombreSistema: string = "planeador";
+let version: number = 2.5;
+let nombreUsuario: string = "Roman";
 
-let menu: string ="1. hamburguesa, 2. hotdog, 3. pizza, 4. refresco, 5. salir";
-let answer;
+console.log("================================");
+console.log("== MI 1er SISTEMA: " + nombreSistema + "  ==");
+console.log("== version: " + version + "               ==");
+console.log("== BIENVENIDO!: " + nombreUsuario + "         ==");
+console.log("================================");
 
-let intentos: number = 1;
-while (intentos > 0) {
-console.log(`Intentos restantes: ${intentos}`);
-console.log(menu);
-  do {
-    
-     answer = await rl.question("¿que va querer hoy? ");
-    
-} while (answer !== "5");
-intentos --;
-if (answer == 1){
-    console.log("hamburguesa");
-}
-if (answer == 2){
-    console.log("hotdog");
-}
-if (answer == 3){
-    console.log("pizza");
-}
-if (answer == 4){
-    console.log("refresco");
-}
-if (intentos == 0){
-    console.log("adios");
+// ==========================================
+// GESTOR DE TAREAS (Entregable Miércoles)
+// ==========================================
+
+// 1. Interface Task
+interface Task {
+  id: number;
+  title: string;
+  completed: boolean;
 }
 
+// Arreglo tipado de Task y contador para IDs únicos
+let tareas: Task[] = [];
+let contadorId: number = 1;
+
+const saveToDB = (tarea:string) => {
+  return new Promise<void>((resolve) => {
+    setTimeout(() => {
+        resolve();
+    }, 2000);
+  });
+}
+
+// Agregar tarea
+const addTask = async (title: string) => {
+  let nuevaTarea: Task = { id: contadorId, title: title, completed: false };
+  try {
+    if (title == "") {
+      throw new Error(
+        console.log("================================"),
+        console.log("No se puede agregar sin titulo"),
+        console.log("================================")
+      );
+    }
+    console.log("guardando "+ title + " en la Base de Datos...");
+    await saveToDB(title);
+    tareas.push(nuevaTarea);
+    contadorId++;
+
+  }catch (error) {
+    console.log(error + " intente de nuevo");
+  }
+};
+
+// Listar tareas (Desestructuración + .map + .forEach) que dificil esto la verdad sin IA no pudiera haber entendido
+const listTasks = (): void => {
+  if (tareas.length === 0) {
+    console.log("No hay tareas registradas.");
+  } else {
+    console.log("====-------Tus tareas-------====");
+    const tareasFormateadas = tareas.map((task) => {
+      const { id, title, completed } = task; 
+      const estado = completed ? "---completada---" : "---pendiente---";
+      return `[${id}] ${title} - ${estado}`;
+    });
+
+    tareasFormateadas.forEach((mensaje) => {
+      console.log(mensaje);
+    });
+
+    console.log("================================")
+  }
+};
+
+// Eliminar última tarea
+const removeTask = (): void => {
+  if (tareas.length > 0) {
+    let tareaEliminada = tareas.pop();
+    if (tareaEliminada) {
+    console.log("===============================")
+      console.log("====----Tarea eliminada:----==> " + tareaEliminada.title);
+      console.log("===============================")
+    }
+  } else {
+    console.log("===============================")
+    console.log("=-No hay tareas para eliminar-= ");
+    console.log("===============================")
+  }
+};
+
+//tarea jueves
+const markCompleted = (id: number) => {
+  let localizador = tareas.find(task => task.id == id);
+  if (localizador) {
+    localizador.completed = true;
+    console.log("===============================")
+    console.log("====----Tarea completada----==> " + localizador.title);
+    console.log("===============================")
+  }else {
+    console.log("=== No se encontro la tarea ===")
+  }
+}
+
+const filterPending = () => {
+  let pendingTasks = tareas.filter(task => task.completed === false);
+  return pendingTasks;
+}
+
+const filterCompleted = () => {
+  let completedTasks = tareas.filter(task => task.completed === true);
+  return completedTasks;
+};
+
+// MENÚ INTERACTIVO
+let opcion: string = "";
+
+while (opcion != "7") {
+  console.log(""); 
+  console.log("==--- MENÚ GESTOR DE TAREAS --==");
+  console.log("==--- seleccione una opcion --==");
+  console.log("== 1. Agregar tarea           ==");
+  console.log("== 2. Eliminar última tarea   ==");
+  console.log("== 3. Listar tareas           ==");
+  console.log("== 4. Completar tarea         ==");
+  console.log("== 5. Tareas pendientes       ==");
+  console.log("== 6. Tareas completadas      ==");
+  console.log("== 7. Salir                   ==");
+
+  opcion = await rl.question(" ----->Elige una opción:-----> ");
+
+  // Opción 1: Pedimos el título y llamamos a addTask
+  if (opcion == "1") {
+    let titulo = await rl.question("Ingresa el título de la tarea: ");
+    await addTask(titulo);
+  }
+  // Opción 2: Solo llamamos a removeTask
+  else if (opcion == "2") {
+    removeTask();
+  }
+  // Opción 3: Solo llamamos a listTasks
+  else if (opcion == "3") {
+    listTasks();
+  }
+    // Opción 4: Solo llamamos a listTasks
+  else if (opcion == "4") {
+    let id = await rl.question("ingresar el id de la tarea: ");
+    markCompleted(Number(id));
+  }
+ // Opción 5: Solo llamamos a listTasks
+else if (opcion == "5") {
+  let pendientes = filterPending();
+  if (pendientes.length === 0) {
+    console.log("No hay tareas pendientes.");
+  } else {
+    pendientes.forEach(({ id, title }) => {
+      console.log("==============================="); 
+      console.log(`[${id}] ${title} - ---pendientes`);
+      console.log("==============================="); 
+    });
+  }
+}
+// Opción 6: Solo llamamos a listTasks
+else if (opcion == "6") {
+  let completadas = filterCompleted();
+  if (completadas.length === 0) {
+    console.log("No hay tareas completadas.");
+  } else {
+    completadas.forEach(({ id, title }) => {
+      console.log("==============================="); 
+      console.log(`[${id}] ${title} - ---completadas`);
+      console.log("==============================="); 
+    });
+  }
+}
+
+  // Opción 7: Salir
+  else if (opcion == "7") {
+    console.log("  _∧,,,∧");
+    console.log("(  ̳• · • ̳)");
+    console.log("/    づ♡  ¡Hasta luego!");
+  }
+  else {
+    console.log("Opción no válida. Intenta de nuevo.");
+  }
+}
+
+// ==========================================
+// entregable Jueves y viernes
+// ==========================================
+
+// nuevas funciones estan arriba por que aca abajo tiraba error 
+//tambien diculpe por lo del menu de comida ese dia fue mas ocupado que un dia de clase entonces estaba mas perdido
+
+/// va arriba
 
 
-// Crear el proyecto e inicializar Git
-//>> git init
-// guarda los cambios:
-//>> git add .
-//>> git commit -m "feat: setup inicial y variables globales"
 
 // 🚫 No eliminar las líneas de abajo ⬇️
 rl.close();
-}
 
-//ya no pude acabar pipipi, no me dio tiempo hoy disculpe maestro
 
-//recordadtorio de hacer el ultimo GIT git add .
-//git commit -m "feat: menú interactivo con ciclo y manejo de arreglo"
+
+
+
